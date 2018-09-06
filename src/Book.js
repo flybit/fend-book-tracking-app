@@ -13,7 +13,7 @@ class Book extends React.Component {
           <ShelfChanger bookId={id} shelf={shelf} onShelfChange={onShelfChange}/>
         </div>
         <div className="book-title">{title}</div>
-        <div className="book-authors">{authors}</div>
+        <div className="book-authors">{authors && authors.join(', ')}</div>
       </div>
     );
   }
