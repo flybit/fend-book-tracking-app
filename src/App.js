@@ -1,26 +1,8 @@
 import React from 'react'
 import * as BooksAPI from './BooksAPI'
-import ShelfChanger from './ShelfChanger'
 import Shelf from './Shelf'
 import './App.css'
 
-var books = [
-  {
-    title: 'My book', author: 'Me', shelf: 'currentlyReading', url: 'http://books.google.com/books/content?id=1q_xAwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE712CA0cBYP8VKbEcIVEuFJRdX1k30rjLM29Y-dw_qU1urEZ2cQ42La3Jkw6KmzMmXIoLTr50SWTpw6VOGq1leINsnTdLc_S5a5sn9Hao2t5YT7Ax1RqtQDiPNHIyXP46Rrw3aL8&source=gbs_api'
-  }, 
-  {
-    title: 'My book 1', author: 'Me', shelf: 'currentlyReading', url: 'http://books.google.com/books/content?id=1q_xAwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE712CA0cBYP8VKbEcIVEuFJRdX1k30rjLM29Y-dw_qU1urEZ2cQ42La3Jkw6KmzMmXIoLTr50SWTpw6VOGq1leINsnTdLc_S5a5sn9Hao2t5YT7Ax1RqtQDiPNHIyXP46Rrw3aL8&source=gbs_api'
-  }, 
-  {
-    title: 'My book 2', author: 'Me', shelf: 'waitingToRead', url: 'http://books.google.com/books/content?id=1q_xAwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE712CA0cBYP8VKbEcIVEuFJRdX1k30rjLM29Y-dw_qU1urEZ2cQ42La3Jkw6KmzMmXIoLTr50SWTpw6VOGq1leINsnTdLc_S5a5sn9Hao2t5YT7Ax1RqtQDiPNHIyXP46Rrw3aL8&source=gbs_api'
-  }, 
-  {
-    title: 'My book 3', author: 'Me', shelf: 'waitingToRead', url: 'http://books.google.com/books/content?id=1q_xAwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE712CA0cBYP8VKbEcIVEuFJRdX1k30rjLM29Y-dw_qU1urEZ2cQ42La3Jkw6KmzMmXIoLTr50SWTpw6VOGq1leINsnTdLc_S5a5sn9Hao2t5YT7Ax1RqtQDiPNHIyXP46Rrw3aL8&source=gbs_api'
-  }, 
-  {
-    title: 'My book 4', author: 'Me', shelf: 'read', url: 'http://books.google.com/books/content?id=1q_xAwAAQBAJ&printsec=frontcover&img=1&zoom=1&imgtk=AFLRE712CA0cBYP8VKbEcIVEuFJRdX1k30rjLM29Y-dw_qU1urEZ2cQ42La3Jkw6KmzMmXIoLTr50SWTpw6VOGq1leINsnTdLc_S5a5sn9Hao2t5YT7Ax1RqtQDiPNHIyXP46Rrw3aL8&source=gbs_api'
-  }
-];
 
 class BooksApp extends React.Component {
   state = {
@@ -30,14 +12,30 @@ class BooksApp extends React.Component {
      * users can use the browser's back and forward buttons to navigate between
      * pages, as well as provide a good URL they can bookmark and share.
      */
-    showSearchPage: false
+    showSearchPage: false,
+    
+    books : []
   }
 
-  componentDidMount() {
-    BooksAPI.getAll().then(r => console.log(r));
+  async componentDidMount() {
+    this.setState({books: await BooksAPI.getAll()});
+  }
+
+  changeShelf = async (bookId, newShelf) => {
+    this.setState({books: this.state.books.map(b => {
+      if (b.id === bookId) {
+        b.shelf = newShelf;
+      }
+      return b;
+    })});
+    await BooksAPI.update({id: bookId}, newShelf);
   }
 
   render() {
+    const currentlyReading = this.state.books.filter(b => b.shelf === 'currentlyReading');
+    const wantToRead = this.state.books.filter(b => b.shelf === 'wantToRead');
+    const read = this.state.books.filter(b => b.shelf === 'read');
+    
     return (
       <div className="app">
         {this.state.showSearchPage ? (
@@ -70,15 +68,17 @@ class BooksApp extends React.Component {
           
             <div className="list-books-content">
               <div>
-                <Shelf name="Currently Reading" books={books} onShelfChange={(o) => console.log(o)}/>
-                <Shelf name="Want to Read" books={books} onShelfChange={(o) => console.log(o)}/>
-                <Shelf name="Read" books={books} onShelfChange={(o) => console.log(o)}/>
+                <Shelf name="Currently Reading" books={currentlyReading} onShelfChange={this.changeShelf}/>
+                <Shelf name="Want to Read" books={wantToRead} onShelfChange={this.changeShelf}/>
+                <Shelf name="Read" books={read} onShelfChange={this.changeShelf}/>
               </div>
             </div>
 
             <div className="open-search">
               <a onClick={() => this.setState({ showSearchPage: true })}>Add a book</a>
             </div>
+
+
           </div>
         )}
       </div>
