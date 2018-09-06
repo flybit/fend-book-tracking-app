@@ -1,19 +1,13 @@
-import React from 'react'
-import * as BooksAPI from './BooksAPI'
-import Shelf from './Shelf'
-import './App.css'
+import React from 'react';
+import { Route, Link } from 'react-router-dom';
+import * as BooksAPI from './BooksAPI';
+import Shelf from './Shelf';
+import sortBy from 'sort-by';
+import './App.css';
 
 
 class BooksApp extends React.Component {
   state = {
-    /**
-     * TODO: Instead of using this state variable to keep track of which page
-     * we're on, use the URL in the browser's address bar. This will ensure that
-     * users can use the browser's back and forward buttons to navigate between
-     * pages, as well as provide a good URL they can bookmark and share.
-     */
-    showSearchPage: false,
-    
     books : []
   }
 
@@ -32,16 +26,17 @@ class BooksApp extends React.Component {
   }
 
   render() {
-    const currentlyReading = this.state.books.filter(b => b.shelf === 'currentlyReading');
-    const wantToRead = this.state.books.filter(b => b.shelf === 'wantToRead');
-    const read = this.state.books.filter(b => b.shelf === 'read');
+    const currentlyReading = this.state.books.filter(b => b.shelf === 'currentlyReading').sort(sortBy('title'));
+    const wantToRead = this.state.books.filter(b => b.shelf === 'wantToRead').sort(sortBy('title'));
+    const read = this.state.books.filter(b => b.shelf === 'read').sort(sortBy('title'));
     
     return (
       <div className="app">
-        {this.state.showSearchPage ? (
+      
+        <Route path="/search" render={() => (
           <div className="search-books">
             <div className="search-books-bar">
-              <a className="close-search" onClick={() => this.setState({ showSearchPage: false })}>Close</a>
+              <Link to="/" className="close-search">Close</Link>
               <div className="search-books-input-wrapper">
                 {/*
                   NOTES: The search from BooksAPI is limited to a particular set of search terms.
@@ -59,7 +54,9 @@ class BooksApp extends React.Component {
               <ol className="books-grid"></ol>
             </div>
           </div>
-        ) : (
+        )}/>
+
+        <Route exact path="/" render={() => (
           <div className="list-books">
           
             <div className="list-books-title">
@@ -75,12 +72,11 @@ class BooksApp extends React.Component {
             </div>
 
             <div className="open-search">
-              <a onClick={() => this.setState({ showSearchPage: true })}>Add a book</a>
+              <Link to="/search">Search</Link>
             </div>
 
-
           </div>
-        )}
+        )}/>
       </div>
     )
   }
