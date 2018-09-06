@@ -3,11 +3,11 @@ import React from 'react'
 class ShelfChanger extends React.Component {
 
   render() {
-    const { selected } = this.props;
+    const { shelf } = this.props;
     
     return (
       <div className="book-shelf-changer">
-        <select value={selected}>
+        <select value={shelf}>
           <option value="move" disabled>Move to...</option>
           <option value="currentlyReading">Currently Reading</option>
           <option value="wantToRead">Want to Read</option>
